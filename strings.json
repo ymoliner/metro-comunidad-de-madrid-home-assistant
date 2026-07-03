@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "CITRAM Transport",
+        "description": "Enter a stop code, e.g. 4_1 for Plaza de Castilla (metro).",
+        "data": {
+          "stop_code": "Stop code",
+          "stop_name": "Friendly name (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not fetch stop info. Check the stop code."
+    },
+    "abort": {
+      "already_configured": "This stop is already configured."
+    }
+  }
+}
