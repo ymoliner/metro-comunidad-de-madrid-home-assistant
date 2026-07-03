@@ -1,0 +1,10 @@
+{
+  "domain": "citram_transport",
+  "name": "CITRAM Transport (EMT/CRTM Madrid)",
+  "codeowners": ["@yago"],
+  "config_flow": true,
+  "documentation": "https://github.com/yourusername/citram_transport",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.1.0"
+}
