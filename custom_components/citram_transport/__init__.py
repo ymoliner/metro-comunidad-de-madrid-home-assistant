@@ -26,10 +26,21 @@ def _get_stop_info(stop_code: str) -> dict:
     return resp.json()["stops"]["Stop"]
 
 
-def _get_line_info(cod_line: str) -> dict:
-    resp = requests.get(f"{CRTM_BASE}/GetLinesInformation.php", params={"codLine": cod_line}, timeout=TIMEOUT)
-    resp.raise_for_status()
-    return resp.json()["lines"]["LineInformation"]
+def _get_line_info(cod_line: str, mode_cache: dict) -> dict:
+    # codLine format is like "4__1___" -> mode is the leading digit before "__"
+    mode = cod_line.split("__")[0]
+    if mode not in mode_cache:
+        resp = requests.get(f"{CRTM_BASE}/GetLines.php", params={"mode": mode}, timeout=TIMEOUT)
+        resp.raise_for_status()
+        lines = resp.json().get("lines", {}).get("Line", [])
+        if isinstance(lines, dict):
+            lines = [lines]
+        mode_cache[mode] = {line["codLine"]: line for line in lines}
+
+    line = mode_cache[mode].get(cod_line)
+    if line is None:
+        raise UpdateFailed(f"Line {cod_line} not found in GetLines.php response for mode {mode}")
+    return line
 
 
 def _get_stop_times(cod_stop: str, stop_type: str, cod_itinerary: str) -> dict:
@@ -55,9 +66,10 @@ def _fetch_arrivals(stop_code: str) -> list[dict]:
         lines = [lines]
 
     arrivals: dict[tuple, bool] = {}
+    mode_cache: dict = {}
     for cod_line in lines:
-        line = _get_line_info(cod_line)
-        itineraries = line["itinerary"]["Itinerary"]
+        line = _get_line_info(cod_line, mode_cache)
+        itineraries = line["shortItinerary"]["Itinerary"]
         if isinstance(itineraries, dict):
             itineraries = [itineraries]
 
